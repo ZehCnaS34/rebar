@@ -1,0 +1,7 @@
+{
+  "flow.pathToFlow": "${workspaceRoot}/node_modules/.bin/flow",
+  "tslint.enable": false,
+  "flow.useNPMPackagedFlow": true,
+"javascript.validate.enable": false,
+"editor.suggest.localityBonus": true
+}
