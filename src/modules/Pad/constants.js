@@ -1,6 +1,12 @@
 export const TAP = "pad.tap";
 export const NOISE = "pad.noise";
 export const PLAY = "pad.play";
+export const PLAYING = "pad.playing";
 export const STOP = "pad.stop";
+export const STOPPED = "pad.stopped";
 export const DOWN_OCTAVE = "pad.downOctave";
 export const UP_OCTAVE = "pad.upOctave";
+export const SET_OCTAVE = "pad.setOctave";
+export const REGISTER_KEYS = "pad.registerKeys";
+export const SET_SCALE = "pad.setScale";
+export const SET_KEY = "pad.setKey";

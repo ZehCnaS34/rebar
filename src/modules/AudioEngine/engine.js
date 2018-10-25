@@ -1,15 +1,43 @@
+import { Pluggable, Node } from "./base";
+import { effects } from "redux-saga";
+
 // @flow
 
-let barTime = (1 / 140) * 60 * 4 * 1000;
+type Timing = number;
 
-let fn = barTime;
-let hn = barTime / 2;
-let qn = barTime / 4;
-let en = barTime / 8;
-let sn = barTime / 16;
-let tn = barTime / 32;
-let ssn = barTime / 64;
-let osn = barTime / 128;
+export const Times = {
+  _bpm: 140,
+  get measure(): Timing {
+    return (1 / this._bpm) * 60 * 4 * 1000;
+  },
+  get whole(): Timing {
+    return this.measure;
+  },
+  get half(): Timing {
+    return this.measure / 2;
+  },
+  get third(): Timing {
+    return this.measure / 3;
+  },
+  get quarter(): Timing {
+    return this.measure / 4;
+  },
+  get eigth(): Timing {
+    return this.measure / 8;
+  },
+  get sixteenth(): Timing {
+    return this.measure / 16;
+  },
+  get thirtysecond(): Timing {
+    return this.measure / 32;
+  },
+  get sixtyfourth(): Timing {
+    return this.measure / 64;
+  },
+  get oneSixtyEigth(): Timing {
+    return this.measure / 128;
+  }
+};
 
 const delay = (ms = 0) =>
   new Promise(r => {
@@ -24,10 +52,6 @@ const clamp = (value: number, floor: number, ceil: number): number =>
 
 interface Destination {
   get target(): AudioNode;
-}
-
-interface VolumeAdjustable {
-  gain: Gain;
 }
 
 interface Sourceable {
@@ -47,11 +71,17 @@ interface IDable {
   id: string;
 }
 
-class Gain implements Destination {
+class Gain implements Destination, Node {
+  _maxVolume = 0.5;
   _gain: GainNode;
   constructor() {
     this._gain = ENGINE.ctx.createGain();
     this._gain.connect(ENGINE.masterVolume);
+  }
+
+  set volumePercent(v: number): void {
+    v = clamp(v, 0, 1);
+    this.volume = this._maxVolume * v;
   }
 
   set volume(value: number) {
@@ -69,6 +99,10 @@ class Gain implements Destination {
   get target(): AudioNode {
     return this._gain;
   }
+}
+
+interface VolumeAdjustable {
+  gain: Gain;
 }
 
 class Note<T: Sourceable>
@@ -148,7 +182,7 @@ class ONote implements Sourceable {
 
 window.ONote = ONote;
 
-class Pulse implements Playable {
+export class Pulse implements Playable {
   source: Note<ONote> = new Note(new ONote());
   _delay: number = 500;
   _duration: number = 500;
@@ -187,13 +221,14 @@ class Pulse implements Playable {
 
 window.Pulse = Pulse;
 
-class Measure implements Playable, IDable {
-  gain = new Gain();
+export class Measure implements Playable, IDable {
   id = "hi";
   _notes: Array<Pulse> = [];
   _playing = false;
+  _loopHandle: ?IntervalID;
 
   constructor() {
+    const { quarter: qn, oneSixtyEigth: osn } = Times;
     this._notes = [
       new Pulse(osn, qn * 0),
       new Pulse(osn, qn * 1),
@@ -211,24 +246,23 @@ class Measure implements Playable, IDable {
   }
 
   async start() {
-    if (this._playing) return true;
-    this._playing = true;
     this.notes.forEach(pulse => pulse.pulse());
     await delay(this.duration);
-    this._playing = false;
     return false;
   }
 
   async stop() {
     this.notes.forEach(pulse => pulse.stop());
+    if (this._loopHandle) clearInterval(this._loopHandle);
     return false;
   }
 
   async loop() {
+    console.log("omg");
     this.start();
-    setInterval(() => {
+    this._loopHandle = setInterval(() => {
       this.start();
-    }, 0);
+    }, Times.measure);
   }
 
   async pause() {
@@ -236,7 +270,7 @@ class Measure implements Playable, IDable {
   }
 
   get duration() {
-    return barTime;
+    return Times.measure;
   }
 }
 
@@ -246,14 +280,47 @@ function setGainVolume(gain: GainNode, value: number) {
   gain.gain.setTargetAtTime(value, gain.context.currentTime, 0.015);
 }
 
-class Channel {
+export class EffectChain<T: AudioNode> {
+  _channel: Channel;
+  _effects: Array<T> = [];
+
+  constructor(channel: Channel) {
+    this._channel = channel;
+    let gain = channel.ctx.createGain();
+    channel.source = gain;
+    this._effects.push(gain);
+  }
+
+  push(newEffect) {
+    if (this._effects.includes(newEffect))
+      throw Error("Cannot include same instance of effect in the chain.");
+    const lastEffect = this._effects[this._effects.length - 1];
+    this._channel.source = newEffect;
+    lastEffect.connect(newEffect);
+    this._effects.push(newEffect);
+  }
+}
+window.EffectChain = EffectChain;
+
+export class Channel {
   gain: GainNode;
   _source: ?AudioNode;
+  _maxVolume = 0.5;
+  _volume = 0;
+
+  get ctx() {
+    return this.gain.context;
+  }
 
   constructor(ctx: AudioContext) {
     this.gain = ctx.createGain();
-
+    this.volume = this._volume;
     this._source = null;
+  }
+
+  set volumePercent(v: number): void {
+    v = clamp(v, 0, 1);
+    this.volume = this._maxVolume * v;
   }
 
   get volume() {
@@ -261,6 +328,7 @@ class Channel {
   }
 
   set volume(value: number) {
+    this._volume = value;
     return setGainVolume(this.gain, value);
   }
 
@@ -270,9 +338,11 @@ class Channel {
 
   set source(value: AudioNode) {
     if (this._source != null) {
+      console.log("disconnecting old source.");
       this._source.disconnect();
     }
 
+    console.log("connected source to gain");
     this._source = value;
     this._source.connect(this.gain);
   }
@@ -281,16 +351,13 @@ class Channel {
 class AudioEngine {
   ctx: AudioContext;
   masterVolume: GainNode;
-  _maxVolume: number;
-  _minVolume: number;
-  _channels: Array<Channel>;
+  _maxVolume: number = 0.5;
+  _minVolume: number = 0.0;
+  _channels: Array<Channel> = [];
 
   constructor() {
     this.ctx = new AudioContext();
     this.masterVolume = this.ctx.createGain();
-    this._maxVolume = 0.5;
-    this._minVolume = 0.0;
-    this._channels = [];
     this.volume = this._maxVolume * 0.75;
     this.masterVolume.connect(this.ctx.destination);
   }
@@ -318,6 +385,21 @@ class AudioEngine {
     return chan;
   }
 }
+
+Number.prototype.times = function(cb) {
+  let output = [];
+  for (let i = 0; i < this; i++) {
+    output.push(cb(i));
+  }
+  return output;
+};
+
+// window.TEST = () => {
+//   let channels = (7).times(() => ENGINE.createChannel());
+//   let effectChains = channels.map(channel => {
+//     return new EffectChain(channel);
+//   });
+// };
 
 const ENGINE = new AudioEngine();
 export default ENGINE;

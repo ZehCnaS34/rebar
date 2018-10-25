@@ -2,9 +2,34 @@ import React from "react";
 import "./Pad.css";
 import ENGINE from "../AudioEngine";
 import { connect } from "react-redux";
-import { tap, play, stop, downOctave, upOctave } from "./action";
+import {
+  tap,
+  play,
+  stop,
+  downOctave,
+  upOctave,
+  registerKeys,
+  setKey,
+  setScale
+} from "./action";
 export * from "./action";
 export { default as padReducer } from "./reducer";
+
+class MNumber extends Number {
+  static get [Symbol.species]() {
+    return Number;
+  }
+
+  get measure() {
+    return 2000;
+  }
+
+  get quarter() {
+    return this.measure / 4;
+  }
+}
+
+window.MNumber = MNumber;
 
 const keyCodeToNote = {
   51: 0,
@@ -35,6 +60,7 @@ class Pad extends React.PureComponent {
   }
 
   componentDidMount() {
+    this.props.registerKeys([0, 1, 2, 3, 4, 5, 6]);
     window.addEventListener("keyup", this.onKeyUp);
     window.addEventListener("keydown", this.onKeyDown);
   }
@@ -45,66 +71,89 @@ class Pad extends React.PureComponent {
   }
 
   onKeyDown = e => {
-    if (this.pressing) return;
-    this.pressing = true;
-    console.log(e.keyCode);
     const note = keyCodeToNote[e.keyCode];
-    if (note !== undefined) {
-      console.log(note);
-      this.props.play(note)();
-    }
+    if (note != null) this.props.play(note)();
   };
 
   onKeyUp = e => {
     const note = keyCodeToNote[e.keyCode];
-    this.pressing = false;
-    if (note) {
-      this.props.stop(note)();
-    }
+    if (note != null) this.props.stop(note)();
   };
+
+  onSetKey = e => this.props.setKey(e.target.value);
+
+  onSetScale = e => this.props.setScale(e.target.value);
 
   render() {
     const { rootNote: root } = this.props;
-    console.log(this.props.tapping);
     return (
-      <div className="pad-container">
-        <button onClick={this.props.downOctave}>down</button>
-        <NotePad
-          onPlay={this.props.play(0)}
-          onStop={this.props.stop(0)}
-          children={"one"}
-        />
-        <NotePad
-          onPlay={this.props.play(1)}
-          onStop={this.props.stop(1)}
-          children={"two"}
-        />
-        <NotePad
-          onPlay={this.props.play(2)}
-          onStop={this.props.stop(2)}
-          children={"three"}
-        />
-        <NotePad
-          onPlay={this.props.play(3)}
-          onStop={this.props.stop(3)}
-          children={"four"}
-        />
-        <NotePad
-          onPlay={this.props.play(4)}
-          onStop={this.props.stop(4)}
-          children={"five"}
-        />
-        <NotePad
-          onPlay={this.props.play(5)}
-          onStop={this.props.stop(5)}
-          children={"six"}
-        />
-        <NotePad
-          onPlay={this.props.play(6)}
-          onStop={this.props.stop(6)}
-          children={"seven"}
-        />
-        <button onClick={this.props.upOctave}>up</button>
+      <div className="pads">
+        <div className="pad-container">
+          <NotePad
+            onPlay={this.props.play(0)}
+            onStop={this.props.stop(0)}
+            children={"one"}
+          />
+          <NotePad
+            onPlay={this.props.play(1)}
+            onStop={this.props.stop(1)}
+            children={"two"}
+          />
+          <NotePad
+            onPlay={this.props.play(2)}
+            onStop={this.props.stop(2)}
+            children={"three"}
+          />
+          <NotePad
+            onPlay={this.props.play(3)}
+            onStop={this.props.stop(3)}
+            children={"four"}
+          />
+          <NotePad
+            onPlay={this.props.play(4)}
+            onStop={this.props.stop(4)}
+            children={"five"}
+          />
+          <NotePad
+            onPlay={this.props.play(5)}
+            onStop={this.props.stop(5)}
+            children={"six"}
+          />
+          <NotePad
+            onPlay={this.props.play(6)}
+            onStop={this.props.stop(6)}
+            children={"seven"}
+          />
+        </div>
+        <div className="control">
+          <button onClick={this.props.downOctave}>down</button>
+          <select value={this.props.pad.octave} onChange={this.props.onOctave}>
+            <option value={1}>1</option>
+            <option value={2}>2</option>
+            <option value={3}>3</option>
+            <option value={4}>4</option>
+            <option value={5}>5</option>
+            <option value={6}>6</option>
+            <option value={7}>7</option>
+            <option value={8}>8</option>
+          </select>
+          <button onClick={this.props.upOctave}>up</button>
+        </div>
+        <div className="info">
+          <select value={this.props.pad.key} onChange={this.onSetKey}>
+            <option value={"a"}>A</option>
+            <option value={"b"}>B</option>
+            <option value={"c"}>C</option>
+            <option value={"d"}>D</option>
+            <option value={"e"}>E</option>
+            <option value={"f"}>F</option>
+            <option value={"g"}>G</option>
+          </select>
+          <select value={this.props.pad.scale} onChange={this.onSetScale}>
+            <option value={"major"}>Major</option>
+            <option value={"minor"}>Minor</option>
+          </select>
+        </div>
       </div>
     );
   }
@@ -112,6 +161,7 @@ class Pad extends React.PureComponent {
 
 function mapState(state) {
   return {
+    pad: state.pad,
     tapping: state.pad.isTapping,
     rootNote: state.pad.rootNote
   };
@@ -120,8 +170,15 @@ function mapState(state) {
 function mapDispatch(dispatch) {
   return {
     tap: () => dispatch(tap()),
-    stop: note => e => dispatch(stop(note)),
-    play: note => e => dispatch(play(note)),
+    setKey: key => dispatch(setKey(key)),
+    setScale: scale => dispatch(setScale(scale)),
+    registerKeys: keys => dispatch(registerKeys(keys)),
+    stop: note => e => {
+      dispatch(stop(note));
+    },
+    play: note => e => {
+      dispatch(play(note));
+    },
     downOctave: () => dispatch(downOctave()),
     upOctave: () => dispatch(upOctave())
   };

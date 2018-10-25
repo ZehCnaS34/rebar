@@ -1,16 +1,17 @@
 import { combineReducers, createStore, applyMiddleware, compose } from "redux";
 import { combineEpics, createEpicMiddleware } from "redux-observable";
 import { createLogger } from "redux-logger";
+import sagaMiddlewareFactory from "redux-saga";
 
-import { padReducer, tapEpic, noiseEpic, playEpic, stopEpic } from "../Pad";
-import { audioEngineReducer, setVolumeEpic } from "../AudioEngine";
+import { padReducer } from "../Pad";
+import * as padEpics from "../Pad/epics";
+import { audioEngineReducer } from "../AudioEngine";
+import * as audioEngineEpics from "../AudioEngine/epics";
+
+const sagaMiddleware = sagaMiddlewareFactory();
 
 const rootEpic = combineEpics(
-  tapEpic,
-  noiseEpic,
-  playEpic,
-  stopEpic,
-  setVolumeEpic
+  ...[...Object.values(padEpics), ...Object.values(audioEngineEpics)]
 );
 const rootReducer = combineReducers({
   pad: padReducer,
@@ -27,6 +28,7 @@ export const configureStore = () => {
     composeEnhancer(
       applyMiddleware(
         epicMiddleware,
+        sagaMiddleware,
         createLogger({
           collapsed: true,
           diff: true

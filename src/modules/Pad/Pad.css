@@ -1,5 +1,14 @@
-.pad-container {
+.pads {
+  display: grid;
   grid-area: pad;
+  grid-template-areas:
+    "info" "control"
+    "pad-container" "pad-container"
+    "pad-container" "pad-container";
+}
+
+.pad-container {
+  grid-area: pad-container;
   display: flex;
   box-shadow: 0 0 1px 1px grey;
 }
@@ -18,4 +27,22 @@
 
 .pad:hover {
   background-color: rgba(0, 0, 0, 0.1);
+}
+
+.info {
+  grid-area: info;
+  display: flex;
+}
+
+.info > * {
+  flex: 1;
+}
+
+.control {
+  grid-area: control;
+  display: flex;
+}
+
+.control > * {
+  flex: 1;
 }
