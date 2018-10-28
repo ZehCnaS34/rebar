@@ -258,7 +258,6 @@ export class Measure implements Playable, IDable {
   }
 
   async loop() {
-    console.log("omg");
     this.start();
     this._loopHandle = setInterval(() => {
       this.start();
@@ -338,11 +337,9 @@ export class Channel {
 
   set source(value: AudioNode) {
     if (this._source != null) {
-      console.log("disconnecting old source.");
       this._source.disconnect();
     }
 
-    console.log("connected source to gain");
     this._source = value;
     this._source.connect(this.gain);
   }

@@ -10,3 +10,5 @@ export const SET_OCTAVE = "pad.setOctave";
 export const REGISTER_KEYS = "pad.registerKeys";
 export const SET_SCALE = "pad.setScale";
 export const SET_KEY = "pad.setKey";
+export const SET_SOURCE = "pad.setSource";
+export const FETCH_MIDI_INFO = "pad.fetchMIDIInformation";

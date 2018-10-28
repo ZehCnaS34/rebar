@@ -2,6 +2,7 @@ import {
   TAP,
   NOISE,
   DOWN_OCTAVE,
+  SET_SOURCE,
   UP_OCTAVE,
   SET_SCALE,
   SET_KEY,
@@ -11,9 +12,18 @@ import {
 const initialState = {
   rootNote: 44,
   key: "c",
-  scale: "major",
+  scale: "minor",
+  source: "triangle",
   octave: 4,
-  keys: [0, 0, 0, 0, 0, 0, 0],
+  keys: [
+    { source: "oscillator.sine" },
+    { source: "oscillator.sine" },
+    { source: "oscillator.sine" },
+    { source: "oscillator.sine" },
+    { source: "oscillator.sine" },
+    { source: "oscillator.sine" },
+    { source: "oscillator.sine" }
+  ],
   isTapping: false
 };
 
@@ -21,6 +31,8 @@ const padReducer = (state = initialState, action) => {
   switch (action.type) {
     case SET_SCALE:
       return { ...state, scale: action.scale };
+    case SET_SOURCE:
+      return { ...state, source: action.source };
     case SET_KEY:
       return { ...state, key: action.key };
     case SET_OCTAVE:

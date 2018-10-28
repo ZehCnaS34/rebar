@@ -1,5 +1,6 @@
 import React from "react";
 import "./Pad.css";
+import { Observable, of, fromEvent } from "rxjs";
 import ENGINE from "../AudioEngine";
 import { connect } from "react-redux";
 import {
@@ -10,8 +11,12 @@ import {
   upOctave,
   registerKeys,
   setKey,
-  setScale
+  setScale,
+  setSource,
+  fetchMIDIInfo
 } from "./action";
+import { mergeMap, map, concatAll } from "rxjs/operators";
+import { merge } from "emotion";
 export * from "./action";
 export { default as padReducer } from "./reducer";
 
@@ -63,6 +68,7 @@ class Pad extends React.PureComponent {
     this.props.registerKeys([0, 1, 2, 3, 4, 5, 6]);
     window.addEventListener("keyup", this.onKeyUp);
     window.addEventListener("keydown", this.onKeyDown);
+    this.props.setupMIDIInfo();
   }
 
   componentWillUnmount() {
@@ -84,15 +90,17 @@ class Pad extends React.PureComponent {
 
   onSetScale = e => this.props.setScale(e.target.value);
 
+  onSetSource = e => this.props.setSource(e.target.value);
+
   render() {
-    const { rootNote: root } = this.props;
+    const { rootNote: root, pad } = this.props;
     return (
       <div className="pads">
         <div className="pad-container">
           <NotePad
             onPlay={this.props.play(0)}
             onStop={this.props.stop(0)}
-            children={"one"}
+            children={pad.keys[0].source}
           />
           <NotePad
             onPlay={this.props.play(1)}
@@ -153,6 +161,12 @@ class Pad extends React.PureComponent {
             <option value={"major"}>Major</option>
             <option value={"minor"}>Minor</option>
           </select>
+          <select value={this.props.pad.source} onChange={this.onSetSource}>
+            <option value={"sine"}>Sine</option>
+            <option value={"sawtooth"}>Sawtooth</option>
+            <option value={"square"}>Square</option>
+            <option value={"triangle"}>Triangle</option>
+          </select>
         </div>
       </div>
     );
@@ -169,6 +183,8 @@ function mapState(state) {
 
 function mapDispatch(dispatch) {
   return {
+    setupMIDIInfo: () => dispatch(fetchMIDIInfo()),
+    setSource: source => dispatch(setSource(source)),
     tap: () => dispatch(tap()),
     setKey: key => dispatch(setKey(key)),
     setScale: scale => dispatch(setScale(scale)),

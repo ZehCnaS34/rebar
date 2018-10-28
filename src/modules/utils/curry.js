@@ -3,7 +3,7 @@ function curry(argCount, fn) {
     return function impl(...args) {
       return args.length >= argCount
         ? fn(...args)
-        : (...rest) => implementation(...args.concat(rest));
+        : (...rest) => impl(...args.concat(rest));
     };
   }
 

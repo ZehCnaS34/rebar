@@ -55,41 +55,12 @@ class Pulse extends React.Component<{}, PulseState> {
     return (
       <>
         <div
-          onMouseDown={this.onMouseDown}
-          onMouseUp={this.onMouseDown}
-          onMouseMove={this.onMouseDown}
           onDragStart={this.onMouseDown}
-          onMouseOver={this.onMouseDown}
           style={this.style(0)}
           className="pulse"
         >
-          {" "}
           0{" "}
         </div>
-        {/* <div style={this.style(1)} className="pulse">
-          {" "}
-          1{" "}
-        </div>
-        <div style={this.style(2)} className="pulse">
-          {" "}
-          2{" "}
-        </div>
-        <div style={this.style(3)} className="pulse">
-          {" "}
-          3{" "}
-        </div>
-        <div style={this.style(4)} className="pulse">
-          {" "}
-          4{" "}
-        </div>
-        <div style={this.style(5)} className="pulse">
-          {" "}
-          5{" "}
-        </div>
-        <div style={this.style(6)} className="pulse">
-          {" "}
-          6{" "}
-        </div> */}
       </>
     );
   }
@@ -105,6 +76,7 @@ class PulseMatrix extends React.Component<{}, {}> {
   render() {
     return (
       <div className="pulse-matrix">
+        <Measure />
         <Measure />
       </div>
     );

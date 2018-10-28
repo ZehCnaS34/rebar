@@ -7,10 +7,11 @@
   background-color: blue;
   width: 100%;
   height: 50%;
-  position: absolute;
+  position: relative;
 }
 
 .pulse {
+  user-select: none;
   background-color: red;
   width: calc(100% / 7);
   height: 25%;

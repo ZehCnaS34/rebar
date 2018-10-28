@@ -1,9 +1,12 @@
 const DEFAULT_OPTIONS = {
-  toString: f => f.toString()
+  toString: f => {
+    return f.toString();
+  }
 };
 
 function memoize(options = DEFAULT_OPTIONS) {
   let cache = {};
+  options = { ...options, ...DEFAULT_OPTIONS };
 
   const wrapper = (...args) => {
     const handle = options.toString(...args);
