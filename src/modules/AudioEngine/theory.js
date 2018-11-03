@@ -5,17 +5,17 @@ import curry from "../utils/curry";
 
 const MIDDLE_C = 261.626;
 
-const step = 0.5017166822;
-const start = 28.78665388;
+const omegaStep = 0.5017166822;
+const omegaStart = 28.78665388;
 
 const FREQUENCIES = (function() {
   return new Array(120)
     .fill(1)
-    .reduce((fs, c) => [...fs, fs[fs.length - 1] + step], [start])
-    .map(v => Math.pow(10, v / 20)); // convert omega to frequencies.
+    .reduce(freqs => [...freqs, freqs[freqs.length - 1] + omegaStep], [
+      omegaStart
+    ])
+    .map(omega => Math.pow(10, omega / 20)); // convert omega to frequencies.
 })();
-
-window.FREQUENCIES = FREQUENCIES;
 
 const notes = ["a", "a#", "b", "c", "c#", "d", "d#", "e", "f", "f#", "g", "g#"];
 const flatNotes = [

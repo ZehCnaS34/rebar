@@ -1,5 +1,5 @@
 import { Pluggable, Node } from "./base";
-import { effects } from "redux-saga";
+import { loadSample } from "../AudioEngine/loader";
 
 // @flow
 
@@ -104,6 +104,53 @@ class Gain implements Destination, Node {
 interface VolumeAdjustable {
   gain: Gain;
 }
+
+class Sample {
+  gain: GainNode;
+  source: AudioBufferSourceNode;
+  _buffer: AudioBuffer;
+
+  constructor() {
+    this.gain = ENGINE.ctx.createGain();
+    this.setupSource();
+    this.connect();
+  }
+
+  setupSource() {
+    this.source = ENGINE.ctx.createBufferSource();
+    this.source.onended = () => {
+      const source = ENGINE.ctx.createBufferSource();
+      source.buffer = this.buffer;
+      source.onended = this.source.onended;
+      this.source = source;
+      this.connect();
+    };
+  }
+
+  connect() {
+    this.source.connect(this.gain);
+    this.gain.connect(ENGINE.masterVolume);
+  }
+
+  play() {
+    this.source.start();
+  }
+
+  set buffer(value) {
+    this._buffer = value;
+    this.source.buffer = value;
+  }
+
+  get buffer() {
+    return this._buffer;
+  }
+
+  async loadSample(sampleName) {
+    this.buffer = await loadSample(sampleName);
+  }
+}
+
+window.Sample = Sample;
 
 class Note<T: Sourceable>
   implements Playable, VolumeAdjustable, IDable, Sourceable {

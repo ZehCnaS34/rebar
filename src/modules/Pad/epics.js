@@ -28,6 +28,7 @@ const clog = filter(() => false);
 
 export const setupMIDIInfoEpic = action$ =>
   action$.pipe(
+    filter(() => false), // NOTE: issue when middi access fails.
     ofType(FETCH_MIDI_INFO),
     map(action => midiAccess()),
     concatAll(),

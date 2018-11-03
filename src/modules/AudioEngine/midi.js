@@ -10,25 +10,27 @@ export const midiAccess = () =>
         observer.complete();
       })
       .catch(() => {
+        console.log("hi");
         observer.error();
       })
   );
 
-export function setupMidiListener() {
-  let access = midiAccess();
-  let accessHandle = access.subscribe(status => console.log({ status }));
+export function MidiListener() {
+  console.log("hi");
+  // let access = midiAccess();
+  // let accessHandle = access.subscribe(status => console.log({ status }));
 
-  let accessStatus = access.pipe(
-    map(access => fromEvent(access, "statechange")),
-    concatAll()
-  );
+  // let accessStatus = access.pipe(
+  //   map(access => fromEvent(access, "statechange")),
+  //   concatAll()
+  // );
 
-  let accessStatusHandle = accessStatus.subscribe(v => console.log(v));
+  // let accessStatusHandle = accessStatus.subscribe(v => console.log(v));
 
   return {
     dispose() {
-      accessStatusHandle.unsubscribe();
-      accessHandle.unsubscribe();
+      // accessStatusHandle.unsubscribe();
+      // accessHandle.unsubscribe();
     }
   };
 }

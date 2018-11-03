@@ -17,6 +17,8 @@ import {
 } from "./action";
 import { mergeMap, map, concatAll } from "rxjs/operators";
 import { merge } from "emotion";
+import { loadSample } from "../AudioEngine/loader";
+const ADSR = require("adsr");
 export * from "./action";
 export { default as padReducer } from "./reducer";
 
