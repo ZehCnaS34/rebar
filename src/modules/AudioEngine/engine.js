@@ -109,6 +109,7 @@ class Sample {
   gain: GainNode;
   source: AudioBufferSourceNode;
   _buffer: AudioBuffer;
+  _ready: boolean;
 
   constructor() {
     this.gain = ENGINE.ctx.createGain();
@@ -128,11 +129,14 @@ class Sample {
   }
 
   connect() {
+    this._ready = true;
     this.source.connect(this.gain);
     this.gain.connect(ENGINE.masterVolume);
   }
 
   play() {
+    if (!this._ready) return;
+    this._ready = false;
     this.source.start();
   }
 

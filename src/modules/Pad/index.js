@@ -21,6 +21,7 @@ import { loadSample } from "../AudioEngine/loader";
 const ADSR = require("adsr");
 export * from "./action";
 export { default as padReducer } from "./reducer";
+window.ADSR = ADSR;
 
 class MNumber extends Number {
   static get [Symbol.species]() {
