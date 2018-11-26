@@ -1,7 +1,6 @@
-import { Pluggable, Node } from "./base";
-import { loadSample } from "../AudioEngine/loader";
-
 // @flow
+import { Node } from "./base";
+import { loadSample } from "../AudioEngine/loader";
 
 type Timing = number;
 
@@ -238,7 +237,7 @@ export class Pulse implements Playable {
   _delay: number = 500;
   _duration: number = 500;
 
-  constructor(duration = 500, delay = 500) {
+  constructor(duration: number = 500, delay: number = 500) {
     this._delay = delay;
     this._duration = duration;
   }
@@ -288,7 +287,7 @@ export class Measure implements Playable, IDable {
     ];
   }
 
-  set notes(value) {
+  set notes(value: Array<Pulse>) {
     this._notes = value;
   }
 
@@ -330,7 +329,7 @@ function setGainVolume(gain: GainNode, value: number) {
   gain.gain.setTargetAtTime(value, gain.context.currentTime, 0.015);
 }
 
-export class EffectChain<T: AudioNode> {
+export class EffectChain<T: AudioNode | GainNode> {
   _channel: Channel;
   _effects: Array<T> = [];
 

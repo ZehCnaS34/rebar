@@ -5,7 +5,9 @@
   "dependencies": {
     "adsr": "^1.0.1",
     "emotion": "^9.2.12",
+    "firebase": "^5.5.9",
     "flow-typed": "^2.5.1",
+    "ramda": "^0.25.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
     "react-emotion": "^9.2.12",
@@ -34,6 +36,7 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "babel-plugin-emotion": "^9.2.11",
     "flow-bin": "^0.83.0"
   }
 }

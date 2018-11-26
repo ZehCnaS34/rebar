@@ -1,5 +1,4 @@
-import { fromEvent, Observable } from "rxjs";
-import { map, concatAll } from "rxjs/operators";
+import { Observable } from "rxjs";
 
 export const midiAccess = () =>
   new Observable(observer =>

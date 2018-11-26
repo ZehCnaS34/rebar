@@ -1,8 +1,18 @@
 import ENGINE, { Pulse, Measure, Times } from "./engine";
 import memoize from "../utils/memoize";
+import * as R from "ramda";
 import { publishBehavior } from "rxjs/operators";
 import curry from "../utils/curry";
 
+function* cycle(lst) {
+  let cursor = 0;
+  while (true) {
+    yield lst[cursor];
+    cursor = (cursor + 1) % lst.length;
+  }
+}
+
+window.cycle = cycle;
 const MIDDLE_C = 261.626;
 
 const omegaStep = 0.5017166822;
@@ -68,6 +78,7 @@ const {
 
 window.KEY_TABLE = KEY_TABLE;
 window.KEY_INDEX_TABLE = KEY_INDEX_TABLE;
+window.FREQUENCIES = FREQUENCIES;
 
 function getKey(note: number) {
   const channel = ENGINE.createChannel();
@@ -79,6 +90,7 @@ function getKey(note: number) {
   oscillator.type = "sawtooth";
   oscillator.start();
   ENGINE.masterVolume.gain.value = 0.2;
+
   return channel;
 }
 
@@ -89,6 +101,10 @@ window.keyCache = keyCache;
 
 export const major = [0, 2, 4, 5, 7, 9, 11];
 export const minor = [0, 2, 3, 5, 7, 8, 10];
+export const ma = [0, 2, 2, 1, 2, 2, 2];
+
+window.minor = minor;
+window.R = R;
 
 export const cord = {
   major: [0, 4, 7],
@@ -128,10 +144,9 @@ const withSample = curry(3, (source, sample, obj) => ({
   sample
 }));
 
-function show(v) {
-  console.log("show", v);
-  return v;
-}
+const log = R.bind(console.log, console);
+
+const show = R.tap(log);
 
 const map = curry(2, (fn, v) => fn(v));
 

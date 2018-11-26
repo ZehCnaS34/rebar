@@ -77,7 +77,6 @@ class PulseMatrix extends React.Component<{}, {}> {
     return (
       <div className="pulse-matrix">
         <Measure />
-        <Measure />
       </div>
     );
   }

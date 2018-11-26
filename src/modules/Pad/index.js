@@ -21,7 +21,6 @@ import { loadSample } from "../AudioEngine/loader";
 const ADSR = require("adsr");
 export * from "./action";
 export { default as padReducer } from "./reducer";
-window.ADSR = ADSR;
 
 class MNumber extends Number {
   static get [Symbol.species]() {
@@ -186,6 +185,7 @@ function mapState(state) {
 
 function mapDispatch(dispatch) {
   return {
+    onOctave: () => ({}),
     setupMIDIInfo: () => dispatch(fetchMIDIInfo()),
     setSource: source => dispatch(setSource(source)),
     tap: () => dispatch(tap()),
