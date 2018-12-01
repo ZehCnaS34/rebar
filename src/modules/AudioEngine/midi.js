@@ -9,13 +9,11 @@ export const midiAccess = () =>
         observer.complete();
       })
       .catch(() => {
-        console.log("hi");
         observer.error();
       })
   );
 
 export function MidiListener() {
-  console.log("hi");
   // let access = midiAccess();
   // let accessHandle = access.subscribe(status => console.log({ status }));
 

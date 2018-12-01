@@ -49,7 +49,6 @@ export const setupMIDIInfoEpic = action$ =>
             // case 51:
             return play(KEY_MAP[key]);
           default:
-            console.log({ key });
             return { type: "NOOP" };
         }
       } else {
@@ -64,7 +63,6 @@ export const setupMIDIInfoEpic = action$ =>
             // case 51:
             return stop(KEY_MAP[key]);
           default:
-            console.log({ key });
             return { type: "NOOP" };
         }
       }

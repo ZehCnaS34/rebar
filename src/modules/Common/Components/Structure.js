@@ -9,3 +9,7 @@ export const Row = styled.div`
   display: flex;
   flex-direction: row;
 `;
+
+export const Item = styled.div`
+  flex: 1;
+`;

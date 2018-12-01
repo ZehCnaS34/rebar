@@ -5,12 +5,16 @@ import * as firebase from "firebase";
 
 import { padReducer } from "../Pad";
 import { audioEngineReducer } from "../AudioEngine";
+import { reducer as feedReducer } from "../Feed";
+import { reducer as formReducer } from "../Form";
 
 import rootEpic from "./epics";
 
 const rootReducer = combineReducers({
   pad: padReducer,
-  audioEngine: audioEngineReducer
+  audioEngine: audioEngineReducer,
+  feed: feedReducer,
+  form: formReducer
 });
 
 export const configureStore = () => {
@@ -43,6 +47,7 @@ export const configureStore = () => {
   );
 
   window.app = app;
+  window.store = store;
 
   epicMiddleware.run(rootEpic);
 
